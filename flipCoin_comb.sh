@@ -1,5 +1,5 @@
 #! /bin/bash -x
-#coin flip simulator (display heads or tails as winner)
+#coin flip simulator (storing singlet_combination)
 
 total_toss=20
 toss_count=0
