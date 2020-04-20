@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 #coin flip simulator storing single doublet and triplet combination as well
 
 total_toss=20
@@ -26,11 +26,30 @@ extract_val () {
         return $value
 }
 
-extract_key () {
-        key=`echo $@ | awk -F"=" '{print $1}'`
-        echo "$key"
+extract_val1 () {
+        val=`echo $@ | awk -F"-" '{print $2}'`
+        return "$val"
 }
-
+sort_arr () {
+	arg=($@)
+	for((i=0;i<${#arg[@]};i++))
+        do
+                extract_val1 ${arg[$i]}
+                val1=$?
+		for ((j=i+1;j<${#arg[@]};j++))
+    		do
+			extract_val1 ${arg[$j]}
+                	val2=$?
+        		if [ $val1 -lt $val2 ]
+        		then
+            			temp=${arg[$i]}
+            			arg[$i]=${arg[$j]}
+            			arg[$j]=$temp
+        		fi
+    		done
+	done
+	echo "Wining combination=${arg[0]}"
+}
 
 get_singlet_comb () {
 	while [ $toss_count -lt $total_toss ]
@@ -51,9 +70,10 @@ get_singlet_comb () {
 	percent_head=$?
 	calculate_percentage $tail_count
 	percent_tail=$?
-	singlet_dict=("heads=$head_count:percent=$percent_head" "tails=$tail_count:percent=$percent_tail")
+	singlet_dict=("heads=$head_count:percent-$percent_head" "tails=$tail_count:percent-$percent_tail")
 	echo ${singlet_dict[@]}
 	toss_count=0
+	sort_arr  ${singlet_dict[@]}
 }
 
 doublet=""
@@ -93,9 +113,10 @@ get_doublet_comb () {
                 val=$?
 		calculate_percentage $val
 		percentage=$?
-		doublet_dict[$i]="${doublet_dict[$i]}:percent=$percentage"
+		doublet_dict[$i]="${doublet_dict[$i]}:percent-$percentage"
         done
         echo ${doublet_dict[@]}
+	sort_arr ${doublet_dict[@]}
 	toss_count=0
 }
 
@@ -135,9 +156,10 @@ get_triplet_comb () {
                 val=$?
                 calculate_percentage $val
                 percentage=$?
-                triplet_dict[$i]="${triplet_dict[$i]}:percent=$percentage"
+                triplet_dict[$i]="${triplet_dict[$i]}:percent-$percentage"
         done
         echo ${triplet_dict[@]}
+	sort_arr ${triplet_dict[@]}
         toss_count=0
 }
 
